@@ -1,0 +1,243 @@
+create table Funcionario  (
+                              FuncionarioId numeric (4),
+                              NomeFuncionario varchar(50) NOT NULL,
+                              Morada varchar(50) NOT NULL,
+                              CodPostalId numeric (3) NOT NULL,
+                              Telefone varchar(20) NOT NULL,
+                              Email varchar(50) NOT NULL,
+                              CategoriaId numeric (4),
+                              CONSTRAINT pk_Funcionario PRIMARY KEY (FuncionarioId),
+                              CONSTRAINT ck_FuncionarioId CHECK (FuncionarioId > 0),
+                              CONSTRAINT fk_CodPostalId FOREIGN KEY (CodPostalId) REFERENCES CodigoPostal (CodPostalId),
+                              CONSTRAINT ck_Email CHECK (Email like '%@%.%'),
+                              CONSTRAINT fk_CategoriaId FOREIGN KEY (CategoriaId) references CategoriaProfessional(CategoriaId)
+                          )
+                          
+INSERT INTO Funcionario (FuncionarioId, NomeFuncionario,Morada,CodPostalId,Telefone,Email,CategoriaId)
+VALUES (1 ,"Bruno Costa", 'Rua da Fonte', 1, '93 6784508', 'bc@gmail.com', 1)
+
+
+INSERT INTO Funcionario VALUES (2,´Ana´, 'Rua da Fonte', 2, '93 6784508', 'bc@gmail.com', 1)
+INSERT INTO Funcionario VALUES (3,´Carlos´, 'Rua da Fonte', 1, '93 6784508', 'bc@gmail.com', 1)
+INSERT INTO Funcionario VALUES (4,´Rui´, 'Rua da Fonte', 2, '93 6784508', 'bc@gmail.com', 1)
+
+drop table Funcionario;
+
+create table CodigoPostal (
+                              CodPostalId numeric(4),
+                              Codigo char(8) NOT NULL,
+                              CidadeId numeric (3) NOT NULL,
+                              CONSTRAINT pk_CodPostalId PRIMARY KEY (CodPostalId),
+                              CONSTRAINT ck_CodPostalId CHECK (CodPostalId > 0),
+                              CONSTRAINT ck_Codigo CHECK (Codigo like '____-___'),
+                              CONSTRAINT fk_CidadeId FOREIGN KEY (CidadeId) REFERENCES Cidade (CidadeId)
+                              
+                          )
+drop table CodigoPostal;
+                          
+create table Cidade (
+                          CidadeId numeric (3),
+                          NomeCidade varchar(30) NOT NULL,
+                          CONSTRAINT pk_CidadeId PRIMARY KEY (CidadeId ),
+                          CONSTRAINT ck_CidadeId CHECK (CidadeId  > 0)
+                    )
+drop table Cidade;                
+
+
+ 
+create table CategoriaProfessional  (
+                                        CategoriaId numeric (4),
+                                        NomeCategoria varchar(20) NOT NULL,
+                                        CONSTRAINT pk_CategoriaId PRIMARY KEY (CategoriaId),
+                                        CONSTRAINT ck__CategoriaId CHECK (CategoriaId > 0)
+                                    )
+drop table CategoriaProfessional;                                    
+                                    
+create table Dotacao  (
+                          CategoriaId numeric (4),
+                          FamiliaId numeric (4),
+                          Quantidade numeric (2),
+                          CONSTRAINT pk_Dotacao PRIMARY KEY (CategoriaId,FamiliaId),
+                          CONSTRAINT fk_Dotacao_Categoria FOREIGN KEY (CategoriaId) REFERENCES CategoriaProfessional (CategoriaId),
+                          CONSTRAINT fk_FamiliaId FOREIGN KEY (FamiliaId) REFERENCES Familia (FamiliaId),
+                          CONSTRAINT ck__Dotacao_quantidade CHECK (Quantidade > 0)
+                      )
+drop table dotacao;
+
+create table Familia  (
+                          FamiliaId numeric (4),
+                          NomeFamilia varchar (30) NOT NULL,
+                          CONSTRAINT pk_FamiliaId PRIMARY KEY (FamiliaId),
+                          CONSTRAINT ck__FamiliaId CHECK (FamiliaId > 0)
+                      )
+drop table Familia;                      
+
+create table Artigo (
+                        ArtigoId NUMERIC  (4),
+                        FamiliaId Numeric (4) NOT NULL,
+                        Descricao VARCHAR (50) NOT NULL,
+                        Stock number (3) NOT NULL,
+                        CONSTRAINT pk_Artigo PRIMARY KEY (ArtigoId ),
+                        CONSTRAINT fk_Artigo FOREIGN KEY (FamiliaId) REFERENCES Familia (FamiliaId),
+                        CONSTRAINT ck_ArtigoId CHECK (ArtigoId  > 0),
+                        CONSTRAINT ck_Stock CHECK (Stock  >= 0)
+                    )
+DROP TABLE Artigo cascade constraints;
+
+
+ALTER TABLE Artigo
+add constraint  teste check (Descricao not null)
+
+CREATE TABLE ArtigoEncomendado (
+                                  EncomendaId NUMERIC (4),
+                                  ArtigoId NUMERIC (4),
+                                  Quantidade NUMERIC (3) NOT NULL,
+                                  CONSTRAINT pk_ArtigoEncomendado PRIMARY KEY (EncomendaId, ArtigoId),
+                                  CONSTRAINT fk_AEncomendado_Encomenda FOREIGN KEY (EncomendaId) REFERENCES Encomenda (EncomendaId),
+                                  CONSTRAINT fk_AEncomendado_Artigo FOREIGN KEY (ArtigoId) REFERENCES Artigo (ArtigoId),
+                                  CONSTRAINT ck__AEncomendado_Quantidade CHECK (quantidade > 0)
+                              )                      
+drop table ArtigoEncomendado;
+
+create table Encomenda  (
+                            EncomendaId numeric (4),
+                            FuncionarioId numeric (4) NOT NULL,
+                            DataEncomenda date NOT NULL,
+                            EstadoAprovacao numeric (1),
+                            EstadoEncomenda numeric (1),
+                            CONSTRAINT pk_Encomenda PRIMARY KEY (EncomendaId),
+                            CONSTRAINT ck__EncomendaId CHECK (EncomendaId > 0),
+                            CONSTRAINT fk_Encomenda_Funcionario FOREIGN KEY (FuncionarioId) REFERENCES Funcionario (FuncionarioId),
+                            CONSTRAINT ck__EstadoAprovacao CHECK (EstadoAprovacao = 0 or EstadoAprovacao = 1),
+                            CONSTRAINT ck__EstadoEncomenda CHECK (EstadoEncomenda = 0 or EstadoEncomenda = 1)
+                        )
+drop table Encomenda;
+                        
+create table Guia (
+                    GuiaId NUMERIC (4),
+                    Encomendaid NUMERIC (4),
+                    DataGuia date NOT NULL,
+                    CONSTRAINT pk_Guia PRIMARY KEY (GuiaId),
+                    CONSTRAINT ck__GuiaId CHECK (Guiaid > 0),
+                    CONSTRAINT fk_Guia_Encomenda FOREIGN KEY (EncomendaId) REFERENCES Encomenda (EncomendaId)
+                  )
+drop table Guia;
+
+CREATE TABLE ArtigoEnviado  (
+                                  GuiaId NUMERIC (4),
+                                  ArtigoEnviadoId NUMERIC (4),
+                                  EncomendaId NUMERIC (4),
+                                  QuantidadeEnviada Numeric (2),
+                                  CONSTRAINT pk_ArtigoEnviado PRIMARY KEY (GuiaId,ArtigoEnviadoId,EncomendaId),
+                                  CONSTRAINT fk_AEnviado_Guia FOREIGN KEY (GuiaId) REFERENCES Guia (GuiaId),
+                                  CONSTRAINT fk_AEnviado_AEncomendado FOREIGN KEY (ArtigoEnviadoId,EncomendaId) REFERENCES ArtigoEncomendado (ArtigoId,EncomendaId)
+                                  
+                              )
+drop table Artigoenviado cascade constraints;  
+
+------------------------------------------------------------------------
+
+--1
+CREATE VIEW FuncionariosSemFarda AS
+SELECT nomefuncionario as Funcionario
+FROM funcionario
+where funcionarioid NOT IN  (  
+                                  SELECT e.funcionarioid
+                                  FROM Encomenda e, guia g
+                                  WHERE e.encomendaid=g.encomendaid
+                            )
+SELECT *
+FROM FuncionarioSemFarda
+
+
+--2
+CREATE VIEW TotalEncomendaCategoria AS                         
+SELECT c.categoriaid, c.nomecategoria, count(*) as Total_Encomendas
+FROM Encomenda e, Funcionario f, CategoriaProfessional c
+WHERE f.funcionarioid=e.funcionarioid
+  AND f.categoriaid=c.categoriaid
+  AND e.estadoencomenda = 1
+  and e.estadoaprovacao = 1
+group by c.categoriaid, c.nomecategoria
+
+
+
+
+SELECT * FROM Funcionario
+SELECT * FROM CategoriaProfessional
+SELECT * FROM Dotacao
+SELECT * FROM Familia
+SELECT * FROM Artigo ORDER BY FamiliaId
+SELECT * FROM Encomenda
+SELECT * FROM ArtigoEncomendado
+SELECT * FROM ArtigoEnviado
+SELECT * FROM Guia
+
+
+SELECT enc.artigoid
+FROM ArtigoEncomendado enc, encomenda e
+WHERE e.encomendaId = enc.encomendaId
+  AND e.funcionarioId = 1 
+  and enc.artigoId NOT IN ( SELECT ArtigoEnviadoId FROM ArtigoEnviado )
+UNION
+SELECT enc.artigoId
+FROM ArtigoEncomendado enc, Artigoenviado env, Encomenda e
+WHERE e.encomendaId = enc.encomendaId
+  AND enc.artigoId=env.artigoenviadoId
+  and e.funcionarioId = 1
+  AND env.quantidadeenviada < enc.quantidade
+  
+  
+SELECT enc.artigoid AS aid FROM ArtigoEncomendado enc, encomenda e
+                      WHERE e.encomendaId = enc.encomendaId AND e.funcionarioId = 1 
+                      AND enc.artigoId NOT IN ( SELECT ArtigoEnviadoId FROM ArtigoEnviado );
+--3
+create or replace
+PROCEDURE artigosNaoEnviados (FuncId NUMBER)
+  IS
+  
+  CURSOR cc IS 
+                      SELECT A.artigoid, A.descricao
+                      FROM ArtigoEncomendado ae, artigo a, encomenda e, funcionario f
+                      WHERE e.funcionarioId=f.funcionarioid
+                        AND e.encomendaid=ae.encomendaid
+                        AND ae.artigoid=A.artigoid
+                        AND e.funcionarioId = 1
+                        AND (ae.artigoId NOT IN  (
+                                                    SELECT ae2.artigoenviadoid FROM ArtigoEnviado ae2
+                                                    where ae2.encomendaid=ae.encomendaid
+                                                )
+                        or A.artigoid IN   (
+                                                SELECT enc.artigoid
+                                                FROM ArtigoEncomendado enc, Artigoenviado env, encomenda e2
+                                                WHERE enc.artigoId=env.artigoenviadoId 
+                                                  AND enc.encomendaid=e2.encomendaid
+                                                  
+                                                  and e2.funcionarioId = 1
+                                                  AND env.quantidadeenviada < enc.quantidade
+                                              ));
+  artId cc%ROWTYPE;
+  
+BEGIN
+    
+    OPEN cc;
+    loop
+        fetch cc INTO artId;
+        
+        exit WHEN cc%NOTFOUND;
+        if artid.aid is not null then
+          dbms_output.put_line(artid.aid);
+        ELSE
+          dbms_output.put_line('teste');
+        end if;
+        
+         
+    END loop;
+    close cc;
+   
+END artigosNaoEnviados;
+
+                         
+begin                        
+  artigosNaoEnviados (1);
+end;
